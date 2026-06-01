@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Score Tools</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <button id="backButton" class="ghost hidden">メニュー</button>
+      <div>
+        <h1 id="screenTitle">Score Tools</h1>
+        <p id="screenSubtitle">Score utilities for mahjong and poker</p>
+      </div>
+    </header>
+
+    <main>
+      <section id="menuScreen" class="screen active">
+        <div class="hero">
+          <h2>Score Tools</h2>
+          <p>メインツールを選択してください。</p>
+        </div>
+
+        <div class="tool-grid">
+          <button class="tool-card primary" data-open="score">
+            <span>
+              <strong>Critical Sonic Sanma Score</strong>
+              <small>Sanma / Yonma Score</small>
+            </span>
+            <b>›</b>
+          </button>
+
+          <button class="tool-card primary" data-open="poker">
+            <span>
+              <strong>Hadou Kaiwai Score</strong>
+              <small>Poker Score / Transfer</small>
+            </span>
+            <b>›</b>
+          </button>
+        </div>
+
+        <div class="other-tools">
+          <h2>Other Tools</h2>
+          <button class="tool-card compact" data-open="chinitsu">
+            <span>
+              <strong>Chinitsu Quiz</strong>
+              <small>清一色 何切る / 待ち確認</small>
+            </span>
+            <b>›</b>
+          </button>
+        </div>
+      </section>
+
+      <section id="scoreScreen" class="screen">
+        <div class="card">
+          <h2>ルール</h2>
+          <div class="segmented">
+            <button class="active" data-score-mode="sanma">三人麻雀</button>
+            <button data-score-mode="yonma">四人麻雀</button>
+          </div>
+          <p id="scoreModeDescription" class="muted"></p>
+          <label class="toggle-row">
+            <input id="chipsEnabledToggle" type="checkbox" checked>
+            <span>チップを記録する</span>
+          </label>
+          <p id="chipsEnabledHelp" class="muted">対局ごとにチップ枚数も入力します。</p>
+        </div>
+
+        <div class="card">
+          <h2>登録メンバー</h2>
+          <p class="muted">三人麻雀・四人麻雀で共通利用します。名前入力欄の候補に表示されます。</p>
+          <div class="member-add-row">
+            <input id="memberNameInput" placeholder="メンバー名">
+            <button id="addMemberButton">追加</button>
+          </div>
+          <div id="memberList" class="member-list"></div>
+          <datalist id="memberOptions"></datalist>
+        </div>
+
+        <div class="card">
+          <h2>入力</h2>
+          <div id="players"></div>
+          <div class="status-row">
+            <span id="scoreTotalText">点数合計：0</span>
+            <span id="chipTotalText">チップ合計：0枚</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>計算結果</h2>
+          <div id="scoreResults" class="muted">点数を入力すると、残り1人は自動計算されます。</div>
+        </div>
+
+        <div class="card">
+          <h2>操作</h2>
+          <div class="button-row">
+            <button id="saveMatchButton">この対局を保存</button>
+            <button id="resetScoreButton" class="secondary">リセット</button>
+          </div>
+          <p id="saveMessage" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h2>ここまでのスコア集計</h2>
+          <div id="sessionArea"></div>
+        </div>
+
+        <div class="card">
+          <h2>対局履歴</h2>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+
+
+      <section id="pokerScreen" class="screen">
+        <div class="card">
+          <h2>Hadou Kaiwai Score</h2>
+          <p class="muted">In / Out / Net を pt 単位で管理します。</p>
+        </div>
+
+        <div class="card">
+          <h2>Members</h2>
+          <p class="muted">Hadou Kaiwai Score専用のメンバーです。麻雀側とは別に管理します。</p>
+          <div class="member-add-row">
+            <input id="pokerMemberNameInput" placeholder="Member name">
+            <button id="addPokerMemberButton">追加</button>
+          </div>
+          <div id="pokerMemberList" class="member-list"></div>
+          <datalist id="pokerMemberOptions"></datalist>
+        </div>
+
+
+        <div class="card">
+          <h2>Rate</h2>
+          <p class="muted">入力したチップ表示値を pt に変換します。例：100点チップを 10000 pt として扱う場合は「100」と入力します。</p>
+          <div class="rate-row">
+            <span>Input ×</span>
+            <input id="pokerPointRateInput" inputmode="numeric" placeholder="1" value="1">
+            <span>= pt</span>
+          </div>
+          <div class="button-row">
+            <button id="pokerRateOneButton" class="secondary">10000 → 10000</button>
+            <button id="pokerRateHundredButton" class="secondary">100 → 10000</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Players</h2>
+          <div id="pokerPlayers"></div>
+          <div class="button-row">
+            <button id="addPokerPlayerButton" class="secondary">Player追加</button>
+            <button id="resetPokerButton" class="secondary">リセット</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Result</h2>
+          <div id="pokerResult" class="muted">In / Out を入力すると Net と Transfer を表示します。</div>
+        </div>
+
+        <div class="card">
+          <h2>Operation</h2>
+          <div class="button-row">
+            <button id="savePokerSessionButton">このセッションを保存</button>
+            <button id="clearPokerHistoryButton" class="secondary">履歴を削除</button>
+          </div>
+          <p id="pokerSaveMessage" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h2>History</h2>
+          <div id="pokerHistoryList" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="chinitsuScreen" class="screen">
+        <div class="card">
+          <div class="segmented">
+            <button class="active" data-chinitsu-main="analysis">解析</button>
+            <button data-chinitsu-main="waitCheck">待ち確認</button>
+            <button data-chinitsu-main="quiz">クイズ</button>
+          </div>
+        </div>
+
+        <div id="analysisPanel">
+          <div class="card">
+            <h2>手牌入力</h2>
+            <div id="analysisHand" class="tile-hand"></div>
+            <div id="analysisTileButtons" class="tile-buttons"></div>
+            <div id="analysisRemoveButtons" class="remove-buttons"></div>
+            <div class="button-row">
+              <span id="analysisCount" class="muted">枚数：0 / 14</span>
+              <button id="analysisReset" class="secondary">リセット</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>解析結果</h2>
+            <div id="analysisResults" class="muted">14枚入力すると、打牌候補と受け入れ枚数を表示します。</div>
+          </div>
+        </div>
+
+        <div id="waitCheckPanel" class="hidden">
+          <div class="card">
+            <h2>13牌 待ち確認</h2>
+            <p class="muted">任意の13牌を入力すると、和了牌を表示します。</p>
+            <div id="waitCheckHand" class="tile-hand"></div>
+            <div id="waitCheckTileButtons" class="tile-buttons"></div>
+            <div id="waitCheckRemoveButtons" class="remove-buttons"></div>
+            <div class="button-row">
+              <span id="waitCheckCount" class="muted">枚数：0 / 13</span>
+              <button id="waitCheckReset" class="secondary">リセット</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>待ち牌</h2>
+            <div id="waitCheckResults" class="muted">13枚入力すると、待ち牌を表示します。</div>
+          </div>
+        </div>
+
+        <div id="quizPanel" class="hidden">
+          <div class="card">
+            <div class="segmented">
+              <button class="active" data-quiz-mode="discard">何切る</button>
+              <button data-quiz-mode="wait">待ち当て</button>
+            </div>
+          </div>
+
+          <div id="discardQuizPanel">
+            <div class="card">
+              <h2>何切る問題</h2>
+              <div id="discardQuizHand" class="tile-hand quiz-hand"></div>
+              <p class="muted">受け入れが一番多くなる打牌は？</p>
+              <div id="discardQuizButtons" class="tile-buttons"></div>
+            </div>
+            <div class="card">
+              <h2>回答</h2>
+              <div id="discardQuizAnswer" class="muted">手牌から切る牌を選んでください。</div>
+              <button id="nextDiscardQuiz" class="secondary">次の問題</button>
+            </div>
+          </div>
+
+          <div id="waitQuizPanel" class="hidden">
+            <div class="card">
+              <h2>待ち当て問題</h2>
+              <div id="waitQuizHand" class="tile-hand quiz-hand"></div>
+              <p class="muted">このテンパイ形の待ち牌は？</p>
+              <div id="waitQuizButtons" class="tile-buttons"></div>
+              <button id="submitWaitQuiz">回答する</button>
+            </div>
+            <div class="card">
+              <h2>回答</h2>
+              <div id="waitQuizAnswer" class="muted">待ち牌を選んで回答してください。複数選択できます。</div>
+              <button id="nextWaitQuiz" class="secondary">次の問題</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
