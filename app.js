@@ -14,6 +14,7 @@ const state = {
   chinitsuMain: "analysis",
   quizMode: "discard",
   analysisCounts: Array(10).fill(0),
+  waitCheckCounts: Array(10).fill(0),
   discardQuizCounts: null,
   discardSelected: null,
   waitQuizCounts: null,
@@ -94,7 +95,7 @@ function openScreen(screen) {
     menu: ["Score Tools", "Score utilities for mahjong and poker"],
     score: ["Critical Sonic Sanma Score", "Sanma / Yonma Score"],
     poker: ["Hadou Kaiwai Score", "Poker Score / Transfer"],
-    chinitsu: ["Chinitsu Quiz", "清一色 何切る / 待ち当て"],
+    chinitsu: ["Chinitsu Quiz", "清一色 何切る / 待ち確認"],
   };
   $("screenTitle").textContent = titles[screen][0];
   $("screenSubtitle").textContent = titles[screen][1];
@@ -554,8 +555,9 @@ function totalTiles(counts) { return counts.reduce((a, b) => a + b, 0); }
 function renderChinitsu() {
   document.querySelectorAll("[data-chinitsu-main]").forEach(btn => btn.classList.toggle("active", btn.dataset.chinitsuMain === state.chinitsuMain));
   $("analysisPanel").classList.toggle("hidden", state.chinitsuMain !== "analysis");
+  $("waitCheckPanel").classList.toggle("hidden", state.chinitsuMain !== "waitCheck");
   $("quizPanel").classList.toggle("hidden", state.chinitsuMain !== "quiz");
-  renderAnalysis(); renderQuiz();
+  renderAnalysis(); renderWaitCheck(); renderQuiz();
 }
 function renderAnalysis() {
   renderHand($("analysisHand"), state.analysisCounts, "hand-normal");
@@ -572,6 +574,50 @@ function renderAnalysis() {
   if (totalTiles(state.analysisCounts) !== 14) { resultRoot.className = "muted"; resultRoot.textContent = "14枚入力すると、打牌候補と受け入れ枚数を表示します。"; }
   else { resultRoot.className = ""; resultRoot.innerHTML = suggestions(state.analysisCounts).map(suggestionRowHTML).join(""); }
 }
+function renderWaitCheck() {
+  renderHand($("waitCheckHand"), state.waitCheckCounts, "hand-normal");
+  $("waitCheckCount").textContent = `枚数：${totalTiles(state.waitCheckCounts)} / 13`;
+  makeTileButtons(
+    $("waitCheckTileButtons"),
+    t => {
+      if (totalTiles(state.waitCheckCounts) < 13 && state.waitCheckCounts[t] < 4) {
+        state.waitCheckCounts[t]++;
+        renderWaitCheck();
+      }
+    },
+    t => totalTiles(state.waitCheckCounts) >= 13 || state.waitCheckCounts[t] >= 4
+  );
+
+  const removeRoot = $("waitCheckRemoveButtons");
+  removeRoot.innerHTML = "";
+  for (let t = 1; t <= 9; t++) {
+    const btn = document.createElement("button");
+    btn.className = "secondary";
+    btn.textContent = `-${t}`;
+    btn.disabled = state.waitCheckCounts[t] <= 0;
+    btn.addEventListener("click", () => {
+      state.waitCheckCounts[t]--;
+      renderWaitCheck();
+    });
+    removeRoot.appendChild(btn);
+  }
+
+  const resultRoot = $("waitCheckResults");
+  if (totalTiles(state.waitCheckCounts) !== 13) {
+    resultRoot.className = "muted";
+    resultRoot.textContent = "13枚入力すると、待ち牌を表示します。";
+    return;
+  }
+
+  const waits = waitTiles(state.waitCheckCounts);
+  resultRoot.className = "";
+  if (waits.length) {
+    resultRoot.innerHTML = `<p><strong>待ち牌：${waits.join(", ")}</strong></p><div class="tile-buttons">${waits.map(t => tileHTML(t)).join("")}</div>`;
+  } else {
+    resultRoot.innerHTML = `<p class="danger"><strong>待ち牌なし</strong></p><p class="muted">この13枚はテンパイ形ではありません。</p>`;
+  }
+}
+
 function renderQuiz() {
   if (!state.discardQuizCounts) state.discardQuizCounts = randomFourteenTileHand();
   if (!state.waitQuizCounts) state.waitQuizCounts = randomThirteenTileTenpaiHand();
@@ -1020,6 +1066,7 @@ $("resetScoreButton").addEventListener("click", () => { state.scores = ["", "", 
 document.querySelectorAll("[data-chinitsu-main]").forEach(btn => btn.addEventListener("click", () => { state.chinitsuMain = btn.dataset.chinitsuMain; renderChinitsu(); }));
 document.querySelectorAll("[data-quiz-mode]").forEach(btn => btn.addEventListener("click", () => { state.quizMode = btn.dataset.quizMode; renderQuiz(); }));
 $("analysisReset").addEventListener("click", () => { state.analysisCounts = Array(10).fill(0); renderAnalysis(); });
+$("waitCheckReset").addEventListener("click", () => { state.waitCheckCounts = Array(10).fill(0); renderWaitCheck(); });
 $("nextDiscardQuiz").addEventListener("click", () => { state.discardQuizCounts = randomFourteenTileHand(); state.discardSelected = null; renderDiscardQuiz(); });
 $("submitWaitQuiz").addEventListener("click", () => { state.waitAnswered = true; renderWaitQuiz(); });
 $("nextWaitQuiz").addEventListener("click", () => { state.waitQuizCounts = randomThirteenTileTenpaiHand(); state.waitSelected = new Set(); state.waitAnswered = false; renderWaitQuiz(); });

@@ -46,7 +46,7 @@
           <button class="tool-card compact" data-open="chinitsu">
             <span>
               <strong>Chinitsu Quiz</strong>
-              <small>清一色 何切る / 待ち当て</small>
+              <small>清一色 何切る / 待ち確認</small>
             </span>
             <b>›</b>
           </button>
@@ -179,6 +179,7 @@
         <div class="card">
           <div class="segmented">
             <button class="active" data-chinitsu-main="analysis">解析</button>
+            <button data-chinitsu-main="waitCheck">待ち確認</button>
             <button data-chinitsu-main="quiz">クイズ</button>
           </div>
         </div>
@@ -198,6 +199,25 @@
           <div class="card">
             <h2>解析結果</h2>
             <div id="analysisResults" class="muted">14枚入力すると、打牌候補と受け入れ枚数を表示します。</div>
+          </div>
+        </div>
+
+        <div id="waitCheckPanel" class="hidden">
+          <div class="card">
+            <h2>13牌 待ち確認</h2>
+            <p class="muted">任意の13牌を入力すると、和了牌を表示します。</p>
+            <div id="waitCheckHand" class="tile-hand"></div>
+            <div id="waitCheckTileButtons" class="tile-buttons"></div>
+            <div id="waitCheckRemoveButtons" class="remove-buttons"></div>
+            <div class="button-row">
+              <span id="waitCheckCount" class="muted">枚数：0 / 13</span>
+              <button id="waitCheckReset" class="secondary">リセット</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>待ち牌</h2>
+            <div id="waitCheckResults" class="muted">13枚入力すると、待ち牌を表示します。</div>
           </div>
         </div>
 
